@@ -4,6 +4,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
     NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
+import ctypes
+import os
 
 ui_file = './UI/MainWindow.ui'
 
@@ -23,7 +25,11 @@ class UI_mainWindow(QMainWindow):
         self.addToolBar(NavigationToolbar(self.plot_wiget.canvas, self))
         self.plot_button.clicked.connect(self.plotting)
 
+
+
     def plotting(self):
+        lib_dir = os.path.join(os.curdir,"libNM1_lib.dll")
+        lib = ctypes.windll.LoadLibrary(lib_dir)
         #X_start=float(self.get_X_start())
         X_start = 0.0
         X_end=float(self.get_X_end())
@@ -33,22 +39,36 @@ class UI_mainWindow(QMainWindow):
 
         # Начальные значения
         u0 = float(self.get_U0()) # Начальное значение функции
+        du0 = float(self.get_DU0()) # Начальное значение производной функции (для осн. задачи - 2)
         h0 = float(self.get_start_step()) # Начальный шаг
         eps = float(self.get_step_control()) # Параметр контроля шага
 
+        Nmax = int(self.get_num_max_iter()) # Максимальное число итераций
+        a = float(self.get_param_a()) # параметр а для осн. задачи - 2
+        # my_func = lib.run_test_method
+        # my_func.argtypes = [ctypes.c_double,ctypes.c_int,ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double]
+        # my_func.restype = ctypes.c_void_p
+        # my_func(u0,1000,X_end,0.01,eps,h0)
 
         task = self.get_task()
         if task[0] == 0:
             # Выбрана тестовая задача
-            print(self.get_task()[1])
+            my_func = lib.run_test_method
+            my_func.argtypes = [ctypes.c_double,ctypes.c_int,ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double]
+            my_func.restype = ctypes.c_void_p
+            my_func(u0,Nmax,X_end,0.01,eps,h0)
         elif task[0] == 1:
-            print(self.get_task()[1])
             # Выбрана основная задача - 1
-            pass
+            my_func = lib.run_main_method_1
+            my_func.argtypes = [ctypes.c_double,ctypes.c_int,ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double]
+            my_func.restype = ctypes.c_void_p
+            my_func(u0,Nmax,X_end,0.01,eps,h0)
         elif task[0] == 2:
-            print(self.get_task()[1])
             # Выбрана основная задача - 2
-            pass
+            my_func = lib.run_main_method_2
+            my_func.argtypes = [ctypes.c_double,ctypes.c_double,ctypes.c_int,ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double]
+            my_func.restype = ctypes.c_void_p
+            my_func(u0,du0,Nmax,X_end,0.01,eps,h0,a) # Последнее значение - параметр a
 
         ###TODO получить значение точек
         ###TODO получить значение точек
@@ -70,6 +90,9 @@ class UI_mainWindow(QMainWindow):
     def get_U0(self):
         return self.U_X0.text()
 
+    def get_DU0(self):
+        return self.DU_X0.text()
+
     def get_start_step(self):
         return self.step_start.text()
 
@@ -81,3 +104,9 @@ class UI_mainWindow(QMainWindow):
 
     def get_step_mode(self):
         return self.step_mode.isChecked()
+
+    def get_param_a(self):
+        return self.parameter_a.text()
+
+    def get_num_max_iter(self):
+        return self.max_num_iter.text()
