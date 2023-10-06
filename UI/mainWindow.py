@@ -23,32 +23,33 @@ class UI_mainWindow(QMainWindow):
         super(UI_mainWindow, self).__init__()
         uic.loadUi(ui_file, self)
 
+        # создание окон для графиков
         self.plt = create_plot(self.plot_widget_1)
         self.plt_PS = create_plot(self.plot_widget_2)
 
+        # присвоение мест для окон
         self.plot_widget_1.canvas.setParent(self.plot_widget_1)
         self.plot_widget_2.canvas.setParent(self.plot_widget_2)
 
-        self.tabWidget.currentChanged.connect(self.toolBar_changing)
+        self.tabWidget.currentChanged.connect(self.toolBar_changing) # задание функционала. В данной строке: Меняет тулбар при переходе на другую вклвдку
         self.plot_toolBar = NavigationToolbar(self.plot_widget_1.canvas, self)
 
-        self.addToolBar(self.plot_toolBar)
+        self.addToolBar(self.plot_toolBar)# создание тулбара
 
-        self.plot_button.clicked.connect(self.plotting)
-
-        self.delete_plot.clicked.connect(self.clear_plots)
+        self.plot_button.clicked.connect(self.plotting)# задание функционала. В данной строке: построение графика при нажатии на кнопку "Построить"
+        self.delete_plot.clicked.connect(self.clear_plots)# задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна для графиков)
 
     def clear_plots(self):
         self.plt.cla()
         self.plt_PS.cla()
-        self.plot_widget_1.canvas.draw()
+        self.plot_widget_1.canvas.draw()# обновление окна
         self.plot_widget_2.canvas.draw()
 
-    def toolBar_changing(self, index):
+    def toolBar_changing(self, index): # изменение привязки тулбара
         self.removeToolBar(self.plot_toolBar)
-        if index == 0:
+        if index == 0:# тулбал для вкладки График
             self.plot_toolBar = NavigationToolbar(self.plot_widget_1.canvas, self)
-        elif index == 2:
+        elif index == 2:# тулбар для вкладки График ФП
             self.plot_toolBar = NavigationToolbar(self.plot_widget_2.canvas, self)
         self.addToolBar(self.plot_toolBar)
 
@@ -59,11 +60,11 @@ class UI_mainWindow(QMainWindow):
         with open(file_name, 'r') as f:
             for line in f:
                 table.append(line.split(' '))
-        self.set_table(table)
         return table
 
     def update_extra_info_table(self,task_index,table):
         table = table[0]
+        # Почему такие индексы? см.: /help/spetsifikatsia_tablitsa.docx
         self.iterations.setText(table[0])
         self.border_error.setText(table[1])
         self.max_error.setText(table[2])
@@ -73,9 +74,12 @@ class UI_mainWindow(QMainWindow):
         self.max_step_x.setText(table[6])
         self.min_step.setText(table[7])
         self.min_step_x.setText(table[8])
-        if task_index==0:
+        if task_index==0:# для тестовой задачи еще есть параметр максимальной разности ан. и числ. решений
             self.max_anal_diff.setText(table[9])
             self.max_anal_diff_x.setText(table[10])
+        else:
+            self.max_anal_diff.setText('0')
+            self.max_anal_diff_x.setText('0')
     def plotting(self):
         lib_dir = os.path.join(os.curdir,"dll","libNM1_lib.dll")
         lib = ctypes.windll.LoadLibrary(lib_dir)
@@ -95,20 +99,20 @@ class UI_mainWindow(QMainWindow):
         a = float(self.get_param_a())  # параметр а для осн. задачи - 2
 
         task = self.get_task()
-        file_name = ""
-        file_name_extra_info = ""
+        file_name = "" # Имя основного файла, в котором хранятся шаги счёта
+        file_name_extra_info = "" # Имя файла с дополнительной информацией (в UI - колонка, расположенная в правом нижнем углу)
+
+        #task[0]- номер задачи. 0-тестовая; 1-основная №1; 2-основная №2
         if task[0] == 0:
-            # Выбрана тестовая задача
-            my_func = lib.run_test_method
+            my_func = lib.run_test_method # выбор задачи
             my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                                ctypes.c_double]
-            my_func.restype = ctypes.c_void_p
+                                ctypes.c_double] # задание типов для параметров функции
+            my_func.restype = ctypes.c_void_p # задание типа возвращаемого значения
             my_func(u0, Nmax, X_end, 0.01, eps, h0)
             file_name = "test_method_1"
             file_name_extra_info = 'test_method_2'
 
         elif task[0] == 1:
-            # Выбрана основная задача - 1
             my_func = lib.run_main_method_1
             my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
                                 ctypes.c_double]
@@ -117,7 +121,6 @@ class UI_mainWindow(QMainWindow):
             file_name = "main_method_1_1"
             file_name_extra_info = 'main_method_1_2'
         elif task[0] == 2:
-            # Выбрана основная задача - 2
             my_func = lib.run_main_method_2
             my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
                                 ctypes.c_double, ctypes.c_double, ctypes.c_double]
@@ -127,13 +130,14 @@ class UI_mainWindow(QMainWindow):
             file_name_extra_info = 'main_method_2_2'
 
         self.clear_table()
-        table = self.file_to_table(file_name)
-
+        table = self.file_to_table(file_name) # Парсинг файла в табличный вид ВАЖНО:(тип ячейки:str)
+        self.set_table(table)
         table_extra_info = self.file_to_table(file_name_extra_info)
         self.update_extra_info_table(task[0],table_extra_info)
 
         X_arr = [float(row[1]) for row in table]
         V_arr = [float(row[2]) for row in table]
+
         if task[0] == 0:
             U_arr=[float(row[9]) for row in table]
             self.plt.plot(X_arr,U_arr,label="Аналит. решение")
@@ -143,10 +147,10 @@ class UI_mainWindow(QMainWindow):
             self.plt_PS.legend(loc="upper right")
 
         self.plt.plot(X_arr, V_arr,label="Числ. решение")
-        self.plt.scatter(X_start,u0,label="Старт. точка")
+        self.plt.scatter(X_start,u0,label="Старт. точка") # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
         self.plt.set_xlim(auto=True)
         self.plt.set_ylim(auto=True)
-        self.plt.legend(loc="upper right")
+        self.plt.legend(loc="upper right") # legend - задание окна легенд
 
         self.plot_widget_1.canvas.draw()
         self.plot_widget_2.canvas.draw()
