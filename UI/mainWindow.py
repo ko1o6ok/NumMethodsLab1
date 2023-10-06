@@ -70,7 +70,7 @@ class UI_mainWindow(QMainWindow):
             self.plot_toolBar = NavigationToolbar(self.plot_widget_2.canvas, self)
         self.addToolBar(self.plot_toolBar)
 
-    def file_to_table(self, file_name):
+    def file_to_table(self, file_name):# из str делает list(list(str))
         if len(file_name.split('.')) == 1:
             file_name += '.txt'
         table = []
@@ -126,7 +126,7 @@ class UI_mainWindow(QMainWindow):
             my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
                                 ctypes.c_double]  # задание типов для параметров функции
             my_func.restype = ctypes.c_void_p  # задание типа возвращаемого значения
-            my_func(u0, Nmax, X_end, 0.01, eps, h0)
+            my_func(u0, Nmax, X_end, 0.01, eps, h0)# Подсчёт значений. Результат записывается в файл
             file_name = "test_method_1"
             file_name_extra_info = 'test_method_2'
 
@@ -149,17 +149,17 @@ class UI_mainWindow(QMainWindow):
 
         self.clear_table()
         table = self.file_to_table(file_name)  # Парсинг файла в табличный вид ВАЖНО:(тип ячейки:str)
-        self.set_table(table, task[0])
+        self.set_table(table, task[0]) # заполнение таблицы(вкладка "Таблица")
         table_extra_info = self.file_to_table(file_name_extra_info)
-        self.update_extra_info_table(task[0], table_extra_info)
+        self.update_extra_info_table(task[0], table_extra_info)# заполнение вспомогательной информации(правый нижний угол)
 
         X_arr = [float(row[1]) for row in table]
         V_arr = [float(row[2]) for row in table]
 
-        if task[0] == 0:
+        if task[0] == 0:# Построение графика аналитического решения(Только для тестовой задачи)
             U_arr = [float(row[9]) for row in table]
             self.plt.plot(X_arr, U_arr, label="Аналит. решение")
-        if task[0] == 2:
+        if task[0] == 2:# Постороение фазового портрета(Только для основной задачи №2)
             dotU_arr = [float(row[3]) for row in table]
             self.plt_PS.plot(X_arr, dotU_arr, label="du/dx")
             self.plt_PS.legend(loc="upper right")
@@ -171,6 +171,7 @@ class UI_mainWindow(QMainWindow):
         self.plt.set_ylim(auto=True)
         self.plt.legend(loc="upper right")  # legend - задание окна легенд
 
+        #обновление графиков
         self.plot_widget_1.canvas.draw()
         self.plot_widget_2.canvas.draw()
 
@@ -200,14 +201,14 @@ class UI_mainWindow(QMainWindow):
 
     def set_row(self, row):
         max_row_index = self.info_table.rowCount()
-        self.info_table.insertRow(max_row_index)
+        self.info_table.insertRow(max_row_index)# создание строки
         for i in range(len(row)):
-            self.info_table.setItem(max_row_index, i, QTableWidgetItem(str(row[i])))
+            self.info_table.setItem(max_row_index, i, QTableWidgetItem(str(row[i])))# заполнение элементами
 
     def set_columns(self, task_index):
         cols = columns[task_index]
-        self.info_table.setColumnCount(len(cols))
-        self.info_table.setHorizontalHeaderLabels(cols)
+        self.info_table.setColumnCount(len(cols))# создание пустых колонок, в количестве len(cols) штук
+        self.info_table.setHorizontalHeaderLabels(cols)# присвоение имен для колонок
 
     def set_table(self, data, task_index):
         self.set_columns(task_index)
