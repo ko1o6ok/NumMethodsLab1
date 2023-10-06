@@ -64,16 +64,16 @@ class UI_mainWindow(QMainWindow):
 
     def update_extra_info_table(self,task_index,table):
         table = table[0]
+        self.iterations.setText(table[0])
+        self.border_error.setText(table[1])
+        self.max_error.setText(table[2])
+        self.step_doubling_counter.setText(table[3])
+        self.step_division_counter.setText(table[4])
+        self.max_step.setText(table[5])
+        self.max_step_x.setText(table[6])
+        self.min_step.setText(table[7])
+        self.min_step_x.setText(table[8])
         if task_index==0:
-            self.iterations.setText(table[0])
-            self.border_error.setText(table[1])
-            self.max_error.setText(table[2])
-            self.step_doubling_counter.setText(table[3])
-            self.step_division_counter.setText(table[4])
-            self.max_step.setText(table[5])
-            self.max_step_x.setText(table[6])
-            self.min_step.setText(table[7])
-            self.min_step_x.setText(table[8])
             self.max_anal_diff.setText(table[9])
             self.max_anal_diff_x.setText(table[10])
     def plotting(self):
@@ -131,7 +131,6 @@ class UI_mainWindow(QMainWindow):
 
         table_extra_info = self.file_to_table(file_name_extra_info)
         self.update_extra_info_table(task[0],table_extra_info)
-        ###TODO вывод дополнительной инфы в колонку, которая находится в правом нижнем углу
 
         X_arr = [float(row[1]) for row in table]
         V_arr = [float(row[2]) for row in table]
@@ -149,9 +148,8 @@ class UI_mainWindow(QMainWindow):
         self.plt.set_ylim(auto=True)
         self.plt.legend(loc="upper right")
 
-
         self.plot_widget_1.canvas.draw()
-
+        self.plot_widget_2.canvas.draw()
     def get_X_start(self):
         return self.X_start.text()
 
