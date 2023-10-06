@@ -62,6 +62,20 @@ class UI_mainWindow(QMainWindow):
         self.set_table(table)
         return table
 
+    def update_extra_info_table(self,task_index,table):
+        table = table[0]
+        if task_index==0:
+            self.iterations.setText(table[0])
+            self.border_error.setText(table[1])
+            self.max_error.setText(table[2])
+            self.step_doubling_counter.setText(table[3])
+            self.step_division_counter.setText(table[4])
+            self.max_step.setText(table[5])
+            self.max_step_x.setText(table[6])
+            self.min_step.setText(table[7])
+            self.min_step_x.setText(table[8])
+            self.max_anal_diff.setText(table[9])
+            self.max_anal_diff_x.setText(table[10])
     def plotting(self):
         lib_dir = os.path.join(os.curdir,"dll","libNM1_lib.dll")
         lib = ctypes.windll.LoadLibrary(lib_dir)
@@ -116,6 +130,7 @@ class UI_mainWindow(QMainWindow):
         table = self.file_to_table(file_name)
 
         table_extra_info = self.file_to_table(file_name_extra_info)
+        self.update_extra_info_table(task[0],table_extra_info)
         ###TODO вывод дополнительной инфы в колонку, которая находится в правом нижнем углу
 
         X_arr = [float(row[1]) for row in table]
