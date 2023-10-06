@@ -63,7 +63,7 @@ class UI_mainWindow(QMainWindow):
         return table
 
     def plotting(self):
-        lib_dir = os.path.join(os.curdir, "libNM1_lib.dll")
+        lib_dir = os.path.join(os.curdir,"dll","libNM1_lib.dll")
         lib = ctypes.windll.LoadLibrary(lib_dir)
 
         X_start = 0.0
@@ -122,17 +122,18 @@ class UI_mainWindow(QMainWindow):
         V_arr = [float(row[2]) for row in table]
         if task[0] == 0:
             U_arr=[float(row[9]) for row in table]
-            self.plt.plot(X_arr,U_arr,label="Analytic sol")
+            self.plt.plot(X_arr,U_arr,label="Аналит. решение")
         if task[0]==2:
             dotU_arr=[float(row[3]) for row in table]
-            self.plt_PS.plot(X_arr,dotU_arr,'->',label="du/dx")
+            self.plt_PS.plot(X_arr,dotU_arr,label="du/dx")
+            self.plt_PS.legend(loc="upper right")
 
-        self.plt.plot(X_arr, V_arr,label="Num sol")
-        self.plt.scatter(X_start,u0,label="Start pos")
+        self.plt.plot(X_arr, V_arr,label="Числ. решение")
+        self.plt.scatter(X_start,u0,label="Старт. точка")
         self.plt.set_xlim(auto=True)
         self.plt.set_ylim(auto=True)
         self.plt.legend(loc="upper right")
-        self.plt_PS.legend(loc="upper right")
+
 
         self.plot_widget_1.canvas.draw()
 
