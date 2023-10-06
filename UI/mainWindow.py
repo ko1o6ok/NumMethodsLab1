@@ -53,6 +53,12 @@ class UI_mainWindow(QMainWindow):
         self.delete_plot.clicked.connect(
             self.clear_plots)  # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна(графики и таблицу))
 
+        # Названия осей
+        self.plot_widget_1.plot.set_xlabel("x")
+        self.plot_widget_1.plot.set_ylabel("U(x)")
+
+        self.plot_widget_2.plot.set_xlabel("U")
+        self.plot_widget_2.plot.set_ylabel("dU/dx")
     def clear_plots(self):
         self.plt.cla()
         self.plt_PS.cla()
@@ -61,6 +67,12 @@ class UI_mainWindow(QMainWindow):
         self.clear_table()
         self.update_extra_info_table(0,[["0"]*11])
 
+        # Названия осей
+        self.plot_widget_1.plot.set_xlabel("x")
+        self.plot_widget_1.plot.set_ylabel("U(x)")
+
+        self.plot_widget_2.plot.set_xlabel("U")
+        self.plot_widget_2.plot.set_ylabel("dU/dx")
 
     def toolBar_changing(self, index):  # изменение привязки тулбара
         self.removeToolBar(self.plot_toolBar)
@@ -105,8 +117,6 @@ class UI_mainWindow(QMainWindow):
         X_start = 0.0
         X_end = float(self.get_X_end())
 
-        X_arr = []
-        V_arr = []
         # Начальные значения
         u0 = float(self.get_U0())  # Начальное значение функции
         du0 = float(self.get_DU0())  # Начальное значение производной функции (для осн. задачи - 2)
@@ -122,30 +132,59 @@ class UI_mainWindow(QMainWindow):
 
         # task[0]- номер задачи. 0-тестовая; 1-основная №1; 2-основная №2
         if task[0] == 0:
-            my_func = lib.run_test_method  # выбор задачи
-            my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                                ctypes.c_double]  # задание типов для параметров функции
-            my_func.restype = ctypes.c_void_p  # задание типа возвращаемого значения
-            my_func(u0, Nmax, X_end, 0.01, eps, h0)# Подсчёт значений. Результат записывается в файл
-            file_name = "test_method_1"
-            file_name_extra_info = 'test_method_2'
+            if self.step_mode.isChecked():
+                my_func = lib.run_test_method # выбор задачи
+                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double] # задание типов для параметров функции
+                my_func.restype = ctypes.c_void_p # задание типа возвращаемого значения
+                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+
+                file_name = "test_method_1"
+                file_name_extra_info = 'test_method_2'
+            else:
+                my_func = lib.run_test_method_const_step # выбор задачи
+                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double] # задание типов для параметров функции
+                my_func.restype = ctypes.c_void_p # задание типа возвращаемого значения
+                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+
+                file_name = "test_method_1_const_step"
+                file_name_extra_info = 'test_method_2_const_step'
 
         elif task[0] == 1:
-            my_func = lib.run_main_method_1
-            my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                                ctypes.c_double]
-            my_func.restype = ctypes.c_void_p
-            my_func(u0, Nmax, X_end, 0.01, eps, h0)
-            file_name = "main_method_1_1"
-            file_name_extra_info = 'main_method_1_2'
+            if self.step_mode.isChecked():
+                my_func = lib.run_main_method_1
+                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double]
+                my_func.restype = ctypes.c_void_p
+                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+                file_name = "main_method_1_1"
+                file_name_extra_info = 'main_method_1_2'
+            else:
+                my_func = lib.run_main_method_1_const_step
+                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double]
+                my_func.restype = ctypes.c_void_p
+                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+                file_name = "main_method_1_1_const_step"
+                file_name_extra_info = 'main_method_1_2_const_step'
         elif task[0] == 2:
-            my_func = lib.run_main_method_2
-            my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
-                                ctypes.c_double, ctypes.c_double, ctypes.c_double]
-            my_func.restype = ctypes.c_void_p
-            my_func(u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
-            file_name = "main_method_2_1"
-            file_name_extra_info = 'main_method_2_2'
+            if self.step_mode.isChecked():
+                my_func = lib.run_main_method_2
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double, ctypes.c_double, ctypes.c_double]
+                my_func.restype = ctypes.c_void_p
+                my_func(u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
+                file_name = "main_method_2_1"
+                file_name_extra_info = 'main_method_2_2'
+            else:
+                my_func = lib.run_main_method_2_const_step
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double, ctypes.c_double, ctypes.c_double]
+                my_func.restype = ctypes.c_void_p
+                my_func(u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
+                file_name = "main_method_2_1_const_step"
+                file_name_extra_info = 'main_method_2_2_const_step'
 
         self.clear_table()
         table = self.file_to_table(file_name)  # Парсинг файла в табличный вид ВАЖНО:(тип ячейки:str)
@@ -156,22 +195,22 @@ class UI_mainWindow(QMainWindow):
         X_arr = [float(row[1]) for row in table]
         V_arr = [float(row[2]) for row in table]
 
-        if task[0] == 0:# Построение графика аналитического решения(Только для тестовой задачи)
-            U_arr = [float(row[9]) for row in table]
-            self.plt.plot(X_arr, U_arr, label="Аналит. решение")
-        if task[0] == 2:# Постороение фазового портрета(Только для основной задачи №2)
-            dotU_arr = [float(row[3]) for row in table]
-            self.plt_PS.plot(X_arr, dotU_arr, label="du/dx")
+        if task[0] == 0:
+            U_arr=[float(row[9]) for row in table]
+            self.plt.plot(X_arr,U_arr,label="Аналит. решение")
+        if task[0]==2:
+            U_arr = [float(row[2]) for row in table]
+            dotU_arr=[float(row[3]) for row in table]
+            self.plt_PS.plot(U_arr,dotU_arr,label="Фазовая кривая")
+            #self.plt_PS.setLabel('left','U')
             self.plt_PS.legend(loc="upper right")
 
-        self.plt.plot(X_arr, V_arr, label="Числ. решение")
-        self.plt.scatter(X_start, u0,
-                         label="Старт. точка")  # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
+        self.plt.plot(X_arr, V_arr,label="Числ. решение")
+        self.plt.scatter(X_start,u0,label="Старт. точка") # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
         self.plt.set_xlim(auto=True)
         self.plt.set_ylim(auto=True)
-        self.plt.legend(loc="upper right")  # legend - задание окна легенд
+        self.plt.legend(loc="upper right") # legend - задание окна легенд
 
-        #обновление графиков
         self.plot_widget_1.canvas.draw()
         self.plot_widget_2.canvas.draw()
 
