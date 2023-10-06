@@ -10,6 +10,17 @@ import os
 
 ui_file = './UI/MainWindow.ui'
 
+columns = {
+    0: ["номер итерации:\ni", "Координата:\nX_i", "Числ. решение:\nV_i", "Числ. решение двойным шагом\nV_2i",
+        "V_i-V_2i", "Оценка лок. погр.", "h_i", "Счётчик делений шага:\nC1", "Счётчик удвоений шага:\nC2",
+        "Аналит. решение:\n U_i", "|U_i-V_i|"],
+    1: ["Номер итерации:\ni", "Координата: \n X_i", "Числ. решение:\nV_i", "Числ. решение двойным шагом V_2i",
+        "Разность:\nv_i-v_2i", "Оценка лок погр:\nОЛП", "Шаг:\nh_i", "Делений шага:\nC1", "Удвоений шага:\nC2"],
+    2: ["Номер итерации:\ni", "Координата:\nX_i", "Числ. решение:\nV_i", "Числ. решение(производная):\nv’_i",
+        "Числ. решение двойным шагом:\nv_2i", "Разность:\nV_i-V_2i", "Оценка лок погр:\nОЛП", "Шаг:\nh_i",
+        "Делений шага:\nC1", "Удвоений шага\nC2"]
+}
+
 
 def create_plot(parent):
     parent.fig = Figure(figsize=(parent.width() / 100, parent.height() / 100))
@@ -31,25 +42,28 @@ class UI_mainWindow(QMainWindow):
         self.plot_widget_1.canvas.setParent(self.plot_widget_1)
         self.plot_widget_2.canvas.setParent(self.plot_widget_2)
 
-        self.tabWidget.currentChanged.connect(self.toolBar_changing) # задание функционала. В данной строке: Меняет тулбар при переходе на другую вклвдку
+        self.tabWidget.currentChanged.connect(
+            self.toolBar_changing)  # задание функционала. В данной строке: Меняет тулбар при переходе на другую вклвдку
         self.plot_toolBar = NavigationToolbar(self.plot_widget_1.canvas, self)
 
-        self.addToolBar(self.plot_toolBar)# создание тулбара
+        self.addToolBar(self.plot_toolBar)  # создание тулбара
 
-        self.plot_button.clicked.connect(self.plotting)# задание функционала. В данной строке: построение графика при нажатии на кнопку "Построить"
-        self.delete_plot.clicked.connect(self.clear_plots)# задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна для графиков)
+        self.plot_button.clicked.connect(
+            self.plotting)  # задание функционала. В данной строке: построение графика при нажатии на кнопку "Построить"
+        self.delete_plot.clicked.connect(
+            self.clear_plots)  # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна для графиков)
 
     def clear_plots(self):
         self.plt.cla()
         self.plt_PS.cla()
-        self.plot_widget_1.canvas.draw()# обновление окна
+        self.plot_widget_1.canvas.draw()  # обновление окна
         self.plot_widget_2.canvas.draw()
 
-    def toolBar_changing(self, index): # изменение привязки тулбара
+    def toolBar_changing(self, index):  # изменение привязки тулбара
         self.removeToolBar(self.plot_toolBar)
-        if index == 0:# тулбал для вкладки График
+        if index == 0:  # тулбал для вкладки График
             self.plot_toolBar = NavigationToolbar(self.plot_widget_1.canvas, self)
-        elif index == 2:# тулбар для вкладки График ФП
+        elif index == 2:  # тулбар для вкладки График ФП
             self.plot_toolBar = NavigationToolbar(self.plot_widget_2.canvas, self)
         self.addToolBar(self.plot_toolBar)
 
@@ -62,7 +76,7 @@ class UI_mainWindow(QMainWindow):
                 table.append(line.split(' '))
         return table
 
-    def update_extra_info_table(self,task_index,table):
+    def update_extra_info_table(self, task_index, table):
         table = table[0]
         # Почему такие индексы? см.: /help/spetsifikatsia_tablitsa.docx
         self.iterations.setText(table[0])
@@ -74,14 +88,15 @@ class UI_mainWindow(QMainWindow):
         self.max_step_x.setText(table[6])
         self.min_step.setText(table[7])
         self.min_step_x.setText(table[8])
-        if task_index==0:# для тестовой задачи еще есть параметр максимальной разности ан. и числ. решений
+        if task_index == 0:  # для тестовой задачи еще есть параметр максимальной разности ан. и числ. решений
             self.max_anal_diff.setText(table[9])
             self.max_anal_diff_x.setText(table[10])
         else:
             self.max_anal_diff.setText('0')
             self.max_anal_diff_x.setText('0')
+
     def plotting(self):
-        lib_dir = os.path.join(os.curdir,"dll","libNM1_lib.dll")
+        lib_dir = os.path.join(os.curdir, "dll", "libNM1_lib.dll")
         lib = ctypes.windll.LoadLibrary(lib_dir)
 
         X_start = 0.0
@@ -99,15 +114,15 @@ class UI_mainWindow(QMainWindow):
         a = float(self.get_param_a())  # параметр а для осн. задачи - 2
 
         task = self.get_task()
-        file_name = "" # Имя основного файла, в котором хранятся шаги счёта
-        file_name_extra_info = "" # Имя файла с дополнительной информацией (в UI - колонка, расположенная в правом нижнем углу)
+        file_name = ""  # Имя основного файла, в котором хранятся шаги счёта
+        file_name_extra_info = ""  # Имя файла с дополнительной информацией (в UI - колонка, расположенная в правом нижнем углу)
 
-        #task[0]- номер задачи. 0-тестовая; 1-основная №1; 2-основная №2
+        # task[0]- номер задачи. 0-тестовая; 1-основная №1; 2-основная №2
         if task[0] == 0:
-            my_func = lib.run_test_method # выбор задачи
+            my_func = lib.run_test_method  # выбор задачи
             my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                                ctypes.c_double] # задание типов для параметров функции
-            my_func.restype = ctypes.c_void_p # задание типа возвращаемого значения
+                                ctypes.c_double]  # задание типов для параметров функции
+            my_func.restype = ctypes.c_void_p  # задание типа возвращаемого значения
             my_func(u0, Nmax, X_end, 0.01, eps, h0)
             file_name = "test_method_1"
             file_name_extra_info = 'test_method_2'
@@ -130,30 +145,32 @@ class UI_mainWindow(QMainWindow):
             file_name_extra_info = 'main_method_2_2'
 
         self.clear_table()
-        table = self.file_to_table(file_name) # Парсинг файла в табличный вид ВАЖНО:(тип ячейки:str)
-        self.set_table(table)
+        table = self.file_to_table(file_name)  # Парсинг файла в табличный вид ВАЖНО:(тип ячейки:str)
+        self.set_table(table, task[0])
         table_extra_info = self.file_to_table(file_name_extra_info)
-        self.update_extra_info_table(task[0],table_extra_info)
+        self.update_extra_info_table(task[0], table_extra_info)
 
         X_arr = [float(row[1]) for row in table]
         V_arr = [float(row[2]) for row in table]
 
         if task[0] == 0:
-            U_arr=[float(row[9]) for row in table]
-            self.plt.plot(X_arr,U_arr,label="Аналит. решение")
-        if task[0]==2:
-            dotU_arr=[float(row[3]) for row in table]
-            self.plt_PS.plot(X_arr,dotU_arr,label="du/dx")
+            U_arr = [float(row[9]) for row in table]
+            self.plt.plot(X_arr, U_arr, label="Аналит. решение")
+        if task[0] == 2:
+            dotU_arr = [float(row[3]) for row in table]
+            self.plt_PS.plot(X_arr, dotU_arr, label="du/dx")
             self.plt_PS.legend(loc="upper right")
 
-        self.plt.plot(X_arr, V_arr,label="Числ. решение")
-        self.plt.scatter(X_start,u0,label="Старт. точка") # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
+        self.plt.plot(X_arr, V_arr, label="Числ. решение")
+        self.plt.scatter(X_start, u0,
+                         label="Старт. точка")  # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
         self.plt.set_xlim(auto=True)
         self.plt.set_ylim(auto=True)
-        self.plt.legend(loc="upper right") # legend - задание окна легенд
+        self.plt.legend(loc="upper right")  # legend - задание окна легенд
 
         self.plot_widget_1.canvas.draw()
         self.plot_widget_2.canvas.draw()
+
     def get_X_start(self):
         return self.X_start.text()
 
@@ -184,7 +201,13 @@ class UI_mainWindow(QMainWindow):
         for i in range(len(row)):
             self.info_table.setItem(max_row_index, i, QTableWidgetItem(str(row[i])))
 
-    def set_table(self, data):
+    def set_columns(self, task_index):
+        cols = columns[task_index]
+        self.info_table.setColumnCount(len(cols))
+        self.info_table.setHorizontalHeaderLabels(cols)
+
+    def set_table(self, data, task_index):
+        self.set_columns(task_index)
         for row in data:
             self.set_row(row)
 

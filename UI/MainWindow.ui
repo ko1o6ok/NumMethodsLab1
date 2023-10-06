@@ -499,6 +499,11 @@
       </column>
       <column>
        <property name="text">
+        <string>V'i</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>V2i</string>
        </property>
       </column>
