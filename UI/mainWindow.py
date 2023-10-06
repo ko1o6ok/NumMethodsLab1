@@ -51,13 +51,16 @@ class UI_mainWindow(QMainWindow):
         self.plot_button.clicked.connect(
             self.plotting)  # задание функционала. В данной строке: построение графика при нажатии на кнопку "Построить"
         self.delete_plot.clicked.connect(
-            self.clear_plots)  # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна для графиков)
+            self.clear_plots)  # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна(графики и таблицу))
 
     def clear_plots(self):
         self.plt.cla()
         self.plt_PS.cla()
         self.plot_widget_1.canvas.draw()  # обновление окна
         self.plot_widget_2.canvas.draw()
+        self.clear_table()
+        self.update_extra_info_table(0,[["0"]*11])
+
 
     def toolBar_changing(self, index):  # изменение привязки тулбара
         self.removeToolBar(self.plot_toolBar)
