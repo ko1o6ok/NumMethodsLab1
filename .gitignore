@@ -1,3 +1,5 @@
 venv
 .idea/
 __pycache__/
+main_method_*.txt
+test_method_*.txt
