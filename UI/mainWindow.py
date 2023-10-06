@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 
 import ctypes
 import os
+import time
 
 ui_file = './UI/MainWindow.ui'
 
@@ -33,6 +34,8 @@ class UI_mainWindow(QMainWindow):
     def __init__(self):
         super(UI_mainWindow, self).__init__()
         uic.loadUi(ui_file, self)
+        # определение значений по умолчанию
+        self.X_start.setText("0")
 
         # создание окон для графиков
         self.plt = create_plot(self.plot_widget_1)
@@ -48,10 +51,14 @@ class UI_mainWindow(QMainWindow):
 
         self.addToolBar(self.plot_toolBar)  # создание тулбара
 
+        # отслеживание нажатий мыши
+        self.plot_widget_1.canvas.mpl_connect('button_press_event', self.onclick)
+        self.plot_widget_1.canvas.mpl_connect('button_release_event', self.onclick)
+
         self.plot_button.clicked.connect(
             self.plotting)  # задание функционала. В данной строке: построение графика при нажатии на кнопку "Построить"
         self.delete_plot.clicked.connect(
-            self.clear_plots)  # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна(графики и таблицу))
+            self.clear_plots) # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна(графики и таблицу))
 
         # Названия осей
         self.plot_widget_1.plot.set_xlabel("x")
@@ -59,13 +66,24 @@ class UI_mainWindow(QMainWindow):
 
         self.plot_widget_2.plot.set_xlabel("U")
         self.plot_widget_2.plot.set_ylabel("dU/dx")
+
+    def onclick(self, event):
+        if event.name == 'button_press_event':
+            self.start_time = time.time()
+        elif event.name == 'button_release_event':
+            self.end_time = time.time()
+            x, y = event.xdata, event.ydata
+            if x != None and y != None and (self.end_time - self.start_time) < 0.15:# 0.15 - эмпирически выведенная константа(время одного клика)
+                self.X_start.setText(str(x))
+                self.U_X0.setText(str(y))
+
     def clear_plots(self):
         self.plt.cla()
         self.plt_PS.cla()
         self.plot_widget_1.canvas.draw()  # обновление окна
         self.plot_widget_2.canvas.draw()
         self.clear_table()
-        self.update_extra_info_table(0,[["0"]*11])
+        self.update_extra_info_table(0, [["0"] * 11])
 
         # Названия осей
         self.plot_widget_1.plot.set_xlabel("x")
@@ -82,7 +100,7 @@ class UI_mainWindow(QMainWindow):
             self.plot_toolBar = NavigationToolbar(self.plot_widget_2.canvas, self)
         self.addToolBar(self.plot_toolBar)
 
-    def file_to_table(self, file_name):# из str делает list(list(str))
+    def file_to_table(self, file_name):  # из str делает list(list(str))
         if len(file_name.split('.')) == 1:
             file_name += '.txt'
         table = []
@@ -114,7 +132,7 @@ class UI_mainWindow(QMainWindow):
         lib_dir = os.path.join(os.curdir, "dll", "libNM1_lib.dll")
         lib = ctypes.windll.LoadLibrary(lib_dir)
 
-        X_start = 0.0
+        X_start = float(self.get_X_start())
         X_end = float(self.get_X_end())
 
         # Начальные значения
@@ -133,20 +151,22 @@ class UI_mainWindow(QMainWindow):
         # task[0]- номер задачи. 0-тестовая; 1-основная №1; 2-основная №2
         if task[0] == 0:
             if self.step_mode.isChecked():
-                my_func = lib.run_test_method # выбор задачи
-                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                                    ctypes.c_double] # задание типов для параметров функции
-                my_func.restype = ctypes.c_void_p # задание типа возвращаемого значения
-                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+                my_func = lib.run_test_method  # выбор задачи
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double,
+                                    ctypes.c_double]  # задание типов для параметров функции
+                my_func.restype = ctypes.c_void_p  # задание типа возвращаемого значения
+                my_func(X_start, u0, Nmax, X_end, 0.01, eps, h0)
 
                 file_name = "test_method_1"
                 file_name_extra_info = 'test_method_2'
             else:
-                my_func = lib.run_test_method_const_step # выбор задачи
-                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                                    ctypes.c_double] # задание типов для параметров функции
-                my_func.restype = ctypes.c_void_p # задание типа возвращаемого значения
-                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+                my_func = lib.run_test_method_const_step  # выбор задачи
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double,
+                                    ctypes.c_double]  # задание типов для параметров функции
+                my_func.restype = ctypes.c_void_p  # задание типа возвращаемого значения
+                my_func(X_start, u0, Nmax, X_end, 0.01, eps, h0)
 
                 file_name = "test_method_1_const_step"
                 file_name_extra_info = 'test_method_2_const_step'
@@ -154,62 +174,68 @@ class UI_mainWindow(QMainWindow):
         elif task[0] == 1:
             if self.step_mode.isChecked():
                 my_func = lib.run_main_method_1
-                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double,
                                     ctypes.c_double]
                 my_func.restype = ctypes.c_void_p
-                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+                my_func(X_start, u0, Nmax, X_end, 0.01, eps, h0)
                 file_name = "main_method_1_1"
                 file_name_extra_info = 'main_method_1_2'
             else:
                 my_func = lib.run_main_method_1_const_step
-                my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                    ctypes.c_double,
                                     ctypes.c_double]
                 my_func.restype = ctypes.c_void_p
-                my_func(u0, Nmax, X_end, 0.01, eps, h0)
+                my_func(X_start, u0, Nmax, X_end, 0.01, eps, h0)
                 file_name = "main_method_1_1_const_step"
                 file_name_extra_info = 'main_method_1_2_const_step'
         elif task[0] == 2:
             if self.step_mode.isChecked():
                 my_func = lib.run_main_method_2
-                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double,
+                                    ctypes.c_double,
                                     ctypes.c_double, ctypes.c_double, ctypes.c_double]
                 my_func.restype = ctypes.c_void_p
-                my_func(u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
+                my_func(X_start, u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
                 file_name = "main_method_2_1"
                 file_name_extra_info = 'main_method_2_2'
             else:
                 my_func = lib.run_main_method_2_const_step
-                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double,
+                                    ctypes.c_double,
                                     ctypes.c_double, ctypes.c_double, ctypes.c_double]
                 my_func.restype = ctypes.c_void_p
-                my_func(u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
+                my_func(X_start, u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
                 file_name = "main_method_2_1_const_step"
                 file_name_extra_info = 'main_method_2_2_const_step'
 
         self.clear_table()
         table = self.file_to_table(file_name)  # Парсинг файла в табличный вид ВАЖНО:(тип ячейки:str)
-        self.set_table(table, task[0]) # заполнение таблицы(вкладка "Таблица")
+        self.set_table(table, task[0])  # заполнение таблицы(вкладка "Таблица")
         table_extra_info = self.file_to_table(file_name_extra_info)
-        self.update_extra_info_table(task[0], table_extra_info)# заполнение вспомогательной информации(правый нижний угол)
+        self.update_extra_info_table(task[0],
+                                     table_extra_info)  # заполнение вспомогательной информации(правый нижний угол)
 
-        X_arr = [float(row[1]) for row in table]
-        V_arr = [float(row[2]) for row in table]
+        X_arr = [X_start] + [float(row[1]) for row in table]
+        V_arr = [u0] + [float(row[2]) for row in table]
 
         if task[0] == 0:
-            U_arr=[float(row[9]) for row in table]
-            self.plt.plot(X_arr,U_arr,label="Аналит. решение")
-        if task[0]==2:
+            U_arr = [u0] + [float(row[9]) for row in table]
+            self.plt.plot(X_arr, U_arr, label="Аналит. решение")
+        if task[0] == 2:
             U_arr = [float(row[2]) for row in table]
-            dotU_arr=[float(row[3]) for row in table]
-            self.plt_PS.plot(U_arr,dotU_arr,label="Фазовая кривая")
-            #self.plt_PS.setLabel('left','U')
+            dotU_arr = [float(row[3]) for row in table]
+            self.plt_PS.plot(U_arr, dotU_arr, label="Фазовая кривая")
+            # self.plt_PS.setLabel('left','U')
             self.plt_PS.legend(loc="upper right")
 
-        self.plt.plot(X_arr, V_arr,label="Числ. решение")
-        self.plt.scatter(X_start,u0,label="Старт. точка") # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
+        self.plt.plot(X_arr, V_arr, label="Числ. решение")
+        self.plt.scatter(X_start, u0,
+                         label="Старт. точка")  # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
         self.plt.set_xlim(auto=True)
         self.plt.set_ylim(auto=True)
-        self.plt.legend(loc="upper right") # legend - задание окна легенд
+        self.plt.legend(loc="upper right")  # legend - задание окна легенд
 
         self.plot_widget_1.canvas.draw()
         self.plot_widget_2.canvas.draw()
@@ -240,14 +266,14 @@ class UI_mainWindow(QMainWindow):
 
     def set_row(self, row):
         max_row_index = self.info_table.rowCount()
-        self.info_table.insertRow(max_row_index)# создание строки
+        self.info_table.insertRow(max_row_index)  # создание строки
         for i in range(len(row)):
-            self.info_table.setItem(max_row_index, i, QTableWidgetItem(str(row[i])))# заполнение элементами
+            self.info_table.setItem(max_row_index, i, QTableWidgetItem(str(row[i])))  # заполнение элементами
 
     def set_columns(self, task_index):
         cols = columns[task_index]
-        self.info_table.setColumnCount(len(cols))# создание пустых колонок, в количестве len(cols) штук
-        self.info_table.setHorizontalHeaderLabels(cols)# присвоение имен для колонок
+        self.info_table.setColumnCount(len(cols))  # создание пустых колонок, в количестве len(cols) штук
+        self.info_table.setHorizontalHeaderLabels(cols)  # присвоение имен для колонок
 
     def set_table(self, data, task_index):
         self.set_columns(task_index)

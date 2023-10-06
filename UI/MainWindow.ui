@@ -29,7 +29,7 @@
     <property name="styleSheet">
      <string notr="true">border-color: rgb(113, 113, 113);</string>
     </property>
-    <layout class="QGridLayout" name="information_layout" columnstretch="1,0,0,0,0,0">
+    <layout class="QGridLayout" name="information_layout" columnstretch="1,0,0,0,0">
      <item row="1" column="0">
       <layout class="QGridLayout" name="gridLayout">
        <property name="horizontalSpacing">
@@ -71,9 +71,12 @@
           </widget>
          </item>
          <item>
+          <widget class="QLineEdit" name="X_start"/>
+         </item>
+         <item>
           <widget class="QLabel" name="label_12">
            <property name="text">
-            <string>0,</string>
+            <string>,</string>
            </property>
           </widget>
          </item>
