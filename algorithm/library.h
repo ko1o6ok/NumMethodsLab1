@@ -6,7 +6,7 @@
 
 double f_test(double x, double u); // Функция для тестовой задачи
 
-double anal_sol_test(double x, double x0, double u0); // Аналитическое решение тестовой задачи
+double anal_sol_test(double x,double u0); // Аналитическое решение тестовой задачи
 
 double f_main_1(double x, double u); // Функция для основной задачи-1
 
@@ -41,8 +41,8 @@ bool inside(double x,double b,double eps_b);
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 // - - max|u_i-v_i| = "" при x = ""
-extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step);
-extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step);
+extern "C" __declspec(dllexport) void run_test_method(double u0, int Nmax,double b, double eps_b, double eps, double step);
+extern "C" __declspec(dllexport) void run_test_method_const_step(double u0, int Nmax,double b, double eps_b, double eps, double step);
 
 // Метод для основной задачи - 1
 // -------------------------
@@ -65,8 +65,8 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, doub
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 
-extern "C" __declspec(dllexport) void run_main_method_1(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step);
-extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step);
+extern "C" __declspec(dllexport) void run_main_method_1(double u0, int Nmax,double b, double eps_b, double eps, double step);
+extern "C" __declspec(dllexport) void run_main_method_1_const_step(double u0, int Nmax,double b, double eps_b, double eps, double step);
 
 // Евклидова норма
 double euclid_norm(std::pair<double,double> v1, std::pair<double,double> v2);
@@ -93,6 +93,6 @@ double euclid_norm(std::pair<double,double> v1, std::pair<double,double> v2);
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 
-extern "C" __declspec(dllexport) void run_main_method_2(double x0, double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a);
-extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0, double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a);
+extern "C" __declspec(dllexport) void run_main_method_2(double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a);
+extern "C" __declspec(dllexport) void run_main_method_2_const_step(double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a);
 #endif //NM1_LIB_LIBRARY_H

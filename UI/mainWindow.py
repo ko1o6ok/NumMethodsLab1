@@ -1,5 +1,5 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem,QLabel
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, \
     NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -8,8 +8,7 @@ import ctypes
 import os
 import time
 
-from table_columns import columns,extra_info_rows
-
+from table_columns import columns, extra_info_rows
 
 ui_file = './UI/MainWindow.ui'
 
@@ -26,7 +25,6 @@ class UI_mainWindow(QMainWindow):
         super(UI_mainWindow, self).__init__()
         uic.loadUi(ui_file, self)
         # определение значений по умолчанию
-        self.X_start.setText("0")
 
         # создание окон для графиков
         self.plt = create_plot(self.plot_widget_1)
@@ -42,14 +40,10 @@ class UI_mainWindow(QMainWindow):
 
         self.addToolBar(self.plot_toolBar)  # создание тулбара
 
-        # отслеживание нажатий мыши
-        self.plot_widget_1.canvas.mpl_connect('button_press_event', self.onclick)
-        self.plot_widget_1.canvas.mpl_connect('button_release_event', self.onclick)
-
         self.plot_button.clicked.connect(
             self.plotting)  # задание функционала. В данной строке: построение графика при нажатии на кнопку "Построить"
         self.delete_plot.clicked.connect(
-            self.clear_plots) # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна(графики и таблицу))
+            self.clear_plots)  # задание функционала. В данной строке: очистка окон от ВСЕХ графиков (чистит все окна(графики и таблицу))
 
         # Названия осей
         self.plot_widget_1.plot.set_xlabel("x")
@@ -57,16 +51,6 @@ class UI_mainWindow(QMainWindow):
 
         self.plot_widget_2.plot.set_xlabel("U")
         self.plot_widget_2.plot.set_ylabel("dU/dx")
-
-    def onclick(self, event):
-        if event.name == 'button_press_event':
-            self.start_time = time.time()
-        elif event.name == 'button_release_event':
-            self.end_time = time.time()
-            x, y = event.xdata, event.ydata
-            if x != None and y != None and (self.end_time - self.start_time) < 0.15:# 0.15 - эмпирически выведенная константа(время одного клика)
-                self.X_start.setText(str(x))
-                self.U_X0.setText(str(y))
 
     def clear_plots(self):
         self.plt.cla()
@@ -108,22 +92,23 @@ class UI_mainWindow(QMainWindow):
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
+
     def update_extra_info_table(self, task_index, table):
         self.clear_exrta_info_table()
 
         table = table[0]
-        i=0
-        cur_table=extra_info_rows[task_index]
+        i = 0
+        cur_table = extra_info_rows[task_index]
         for elem in table:
-            cur_text=f"{cur_table[i]} {elem}"
-            self.extra_info_layout.addWidget(QLabel(cur_text,self))
-            i+=1
+            cur_text = f"{cur_table[i]} {elem}"
+            self.extra_info_layout.addWidget(QLabel(cur_text, self))
+            i += 1
 
     def plotting(self):
         lib_dir = os.path.join(os.curdir, "dll", "libNM1_lib.dll")
         lib = ctypes.windll.LoadLibrary(lib_dir)
 
-        X_start = float(self.get_X_start())
+        X_start = 0.0
         X_end = float(self.get_X_end())
 
         # Начальные значения
@@ -151,11 +136,11 @@ class UI_mainWindow(QMainWindow):
                 file_name = "test_method_1_const_step"
                 file_name_extra_info = 'test_method_2_const_step'
 
-            my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+            my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
                                 ctypes.c_double,
                                 ctypes.c_double]  # задание типов для параметров функции
             my_func.restype = ctypes.c_void_p  # задание типа возвращаемого значения
-            my_func(X_start, u0, Nmax, X_end, 0.01, eps, h0)
+            my_func(u0, Nmax, X_end, 0.01, eps, h0)
 
 
         elif task[0] == 1:
@@ -168,11 +153,11 @@ class UI_mainWindow(QMainWindow):
                 file_name = "main_method_1_1_const_step"
                 file_name_extra_info = 'main_method_1_2_const_step'
 
-            my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
-                                    ctypes.c_double,
-                                    ctypes.c_double]
+            my_func.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+                                ctypes.c_double,
+                                ctypes.c_double]
             my_func.restype = ctypes.c_void_p
-            my_func(X_start, u0, Nmax, X_end, 0.01, eps, h0)
+            my_func(u0, Nmax, X_end, 0.01, eps, h0)
 
 
         elif task[0] == 2:
@@ -187,15 +172,14 @@ class UI_mainWindow(QMainWindow):
                 file_name_for_V_dot = "main_method_2_1_const_step_v_dot"
                 file_name_extra_info = 'main_method_2_2_const_step'
 
-            my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double,
-                                    ctypes.c_double,
-                                    ctypes.c_double, ctypes.c_double, ctypes.c_double]
+            my_func.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_double,
+                                ctypes.c_double,
+                                ctypes.c_double, ctypes.c_double, ctypes.c_double]
             my_func.restype = ctypes.c_void_p
-            my_func(X_start, u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
+            my_func(u0, du0, Nmax, X_end, 0.01, eps, h0, a)  # Последнее значение - параметр a
 
             self.clear_table(self.info_table_V_dot)
             self.set_table(self.info_table_V_dot, self.file_to_table(file_name_for_V_dot), file_name_for_V_dot)
-
 
         self.clear_table(self.info_table)
         table = self.file_to_table(file_name)  # Парсинг файла в табличный вид (тип ячейки:str)
@@ -219,6 +203,7 @@ class UI_mainWindow(QMainWindow):
             self.plt_PS.legend(loc="upper right")
         else:
             self.clear_table(self.info_table_V_dot)
+            self.plt_PS.cla()
 
         self.plt.plot(X_arr, V_arr, label="Числ. решение")
         self.plt.scatter(X_start, u0,
@@ -255,21 +240,21 @@ class UI_mainWindow(QMainWindow):
     def get_step_mode(self):
         return self.step_mode.isChecked()
 
-    def set_row(self,table, row):
+    def set_row(self, table, row):
         max_row_index = table.rowCount()
         table.insertRow(max_row_index)  # создание строки
         for i in range(len(row)):
             table.setItem(max_row_index, i, QTableWidgetItem(str(row[i])))  # заполнение элементами
 
-    def set_columns(self,table, task_index):
+    def set_columns(self, table, task_index):
         cols = columns[task_index]
         table.setColumnCount(len(cols))  # создание пустых колонок, в количестве len(cols) штук
         table.setHorizontalHeaderLabels(cols)  # присвоение имен для колонок
 
-    def set_table(self,table, data, task_index):
-        self.set_columns(table,task_index)
+    def set_table(self, table, data, task_index):
+        self.set_columns(table, task_index)
         for row in data:
-            self.set_row(table,row)
+            self.set_row(table, row)
 
     def clear_table(self, table):
         while (table.rowCount() > 0):

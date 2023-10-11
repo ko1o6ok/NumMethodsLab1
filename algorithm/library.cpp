@@ -14,8 +14,8 @@ double f_test(double x, double u) {
     return -0.5 * u;
 }
 // Аналитическое решение тестовой задачи
-double anal_sol_test(double x, double x0,double u0){
-    return u0 * exp(-0.5 * (x-x0));
+double anal_sol_test(double x,double u0){
+    return u0 * exp(-0.5 * x);
 }
 // du/dx = f_main_1(x,u)
 double f_main_1(double x, double u) {
@@ -104,7 +104,7 @@ bool inside(double x,double b,double eps_b){
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 // - - max|u_i-v_i| = "" при x = ""
-extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_test_method(double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     //std::ofstream file_1(R"(C:\C++_proj\NM\NumMethodsLab1\NM1\test_method_1.txt)"); // Файл с данными для таблицы
@@ -114,7 +114,7 @@ extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int 
     std::ofstream file_2("test_method_2.txt"); // Файл с выходными данными
 
     double v = u0;
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help,v_help; // Координаты вспомогательной точки численной траектории
@@ -173,7 +173,7 @@ extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int 
             // Принимаем следующую точку
             x = x_current;
             v = v_current;
-            sol = anal_sol_test(x,x0,u0); // Аналит. реш в этой точке
+            sol = anal_sol_test(x,u0); // Аналит. реш в этой точке
             diff =  std::abs(sol-v);
             if(diff > max_diff){
                 max_diff = diff;
@@ -199,7 +199,7 @@ extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int 
     file_2.close();
 }
 // Тот же метод с постоянным шагом
-extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_test_method_const_step(double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     //std::ofstream file_1(R"(C:\C++_proj\NM\NumMethodsLab1\NM1\test_method_1.txt)"); // Файл с данными для таблицы
@@ -209,7 +209,7 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, doub
     std::ofstream file_2("test_method_2_const_step.txt"); // Файл с выходными данными
 
     double v = u0;
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help,v_help; // Координаты вспомогательной точки численной траектории
@@ -252,17 +252,17 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, doub
         // Всегда принимаем следующую точку
         x = x_current;
         v = v_current;
-        sol = anal_sol_test(x,x0,u0); // Аналит. реш в этой точке
+        sol = anal_sol_test(x,u0); // Аналит. реш в этой точке
         diff =  std::abs(sol-v);
-        if (diff > max_diff)
+        if(diff > max_diff)
             max_diff = diff;
-        file_1 << (i + 1) << " " << x << " " << v << " " << h << " " << C1 << " " << C2 << " " << sol << " " << diff << "\n";
+        file_1 << (i + 1) << " " << x << " " << v << " " <<h << " " <<C1<< " " <<C2<< " "<<sol<< " "<< diff <<"\n";
 
 
         n = i + 1;
     }
     file_1.close();
-    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step << " " << max_diff << " " << x_max_diff;
+    file_2 << n << " " << b-x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step << " " << max_diff<<" "<<x_max_diff ;
     file_2.close();
 }
 
@@ -287,7 +287,7 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, doub
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 
-extern "C" __declspec(dllexport) void run_main_method_1(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_main_method_1(double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     std::ofstream file_1("main_method_1_1.txt"); // Файл с данными для таблицы
@@ -295,7 +295,7 @@ extern "C" __declspec(dllexport) void run_main_method_1(double x0, double u0, in
 
 
     double v = u0;
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help,v_help; // Координаты вспомогательной точки численной траектории
@@ -370,7 +370,7 @@ extern "C" __declspec(dllexport) void run_main_method_1(double x0, double u0, in
     file_2.close();
 }
 // Версия с постоянным шагом
-extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_main_method_1_const_step(double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     std::ofstream file_1("main_method_1_1_const_step.txt"); // Файл с данными для таблицы
@@ -378,7 +378,7 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, do
 
 
     double v = u0;
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help,v_help; // Координаты вспомогательной точки численной траектории
@@ -417,11 +417,11 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, do
         x = x_current;
         v = v_current;
 
-        file_1 << (i + 1) << " " << x << " " << v << " " << h << " " << C1 << " " << C2 << "\n";
+        file_1 << (i + 1) << " " << x << " " << v << " " <<h << " " <<C1<< " " <<C2 <<"\n";
         n = i + 1;
     }
     file_1.close();
-    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step;
+    file_2 << n << " " << b-x  << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
     file_2.close();
 }
 // Евклидова норма
@@ -452,7 +452,7 @@ double euclid_norm(pair<double,double> v1, pair<double,double> v2){
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 
-extern "C" __declspec(dllexport) void run_main_method_2(double x0, double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
+extern "C" __declspec(dllexport) void run_main_method_2(double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
     // x0 = 0
 
     std::ofstream file_1("main_method_2_1_v.txt"); // Файл с данными для таблицы
@@ -460,7 +460,7 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0, double u0,dou
     std::ofstream file_3("main_method_2_1_v_dot.txt"); // Файл с данными для таблицы
 
     pair<double,double> v = {u0,u0_dot}; // Теперь мы итерируем вектор
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help; // Координаты вспомогательной точки численной траектории
@@ -539,7 +539,7 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0, double u0,dou
     file_2.close();
 }
 
-extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0, double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
+extern "C" __declspec(dllexport) void run_main_method_2_const_step(double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
     // x0 = 0
 
     std::ofstream file_1("main_method_2_1_const_step_v.txt"); // Файл с данными для таблицы
@@ -547,7 +547,7 @@ extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0, do
     std::ofstream file_3("main_method_2_1_const_step_v_dot.txt"); // Файл с данными для таблицы
 
     pair<double,double> v = {u0,u0_dot}; // Теперь мы итерируем вектор
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help; // Координаты вспомогательной точки численной траектории
@@ -589,12 +589,12 @@ extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0, do
         x = x_current;
         v = v_current;
         // Здесь не как в таблице сделано - добавлена производная u' = v.second
-        file_1 << (i + 1) << " " << x << " " << v.first << " " << h << " " << C1 << " " << C2 << "\n";
-        file_3 << (i + 1) << " " << x << " " << v.second << " " << h << " " << C1 << " " << C2 << "\n";
+        file_1 << (i + 1) << " " << x << " " << v.first << " " <<h << " " <<C1<< " " <<C2 <<"\n";
+        file_3 << (i + 1) << " " << x << " " << v.second<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
         n = i + 1;
     }
     file_3.close();
     file_1.close();
-    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step;
+    file_2 << n << " " << b-x  << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
     file_2.close();
 }

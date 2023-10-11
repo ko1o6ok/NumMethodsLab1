@@ -71,7 +71,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="X_start"/>
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_12">
