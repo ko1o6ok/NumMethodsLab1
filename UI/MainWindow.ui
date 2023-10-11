@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>914</width>
+    <width>913</width>
     <height>907</height>
    </rect>
   </property>
@@ -135,168 +135,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="4">
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Число удвоений:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="step_doubling_counter">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="step_division_counter">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="0">
-          <widget class="QLabel" name="label_22">
-           <property name="text">
-            <string>max|u_i-v_i| = </string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QLabel" name="max_error">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLabel" name="min_step_x">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>максимальная ОЛП:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="max_step_x">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>минимальный шаг:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_21">
-           <property name="text">
-            <string>при x = </string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_13">
-           <property name="text">
-            <string>Число делений:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLabel" name="min_step">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>максимальный шаг:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="max_step">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QLabel" name="border_error">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="label_20">
-           <property name="text">
-            <string>b - x_n = </string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>итераций n:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QLabel" name="iterations">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QLabel" name="max_anal_diff">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QLabel" name="label_23">
-           <property name="text">
-            <string>при x = </string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1">
-          <widget class="QLabel" name="max_anal_diff_x">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>при x = </string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
      <item row="0" column="4">
       <widget class="QLabel" name="label_10">
        <property name="text">
@@ -416,6 +254,9 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="4">
+      <layout class="QVBoxLayout" name="extra_info_layout"/>
+     </item>
     </layout>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
@@ -452,99 +293,151 @@
      <attribute name="title">
       <string>Таблица</string>
      </attribute>
-     <widget class="QTableWidget" name="info_table">
+     <widget class="QToolBox" name="toolBox">
       <property name="geometry">
        <rect>
-        <x>41</x>
+        <x>0</x>
         <y>0</y>
-        <width>801</width>
+        <width>901</width>
         <height>531</height>
        </rect>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>426</width>
-        <height>454</height>
-       </size>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>802</width>
-        <height>9999999</height>
-       </size>
-      </property>
-      <property name="autoScroll">
-       <bool>true</bool>
-      </property>
-      <property name="autoScrollMargin">
-       <number>16</number>
-      </property>
-      <property name="verticalScrollMode">
-       <enum>QAbstractItemView::ScrollPerPixel</enum>
-      </property>
-      <property name="horizontalScrollMode">
-       <enum>QAbstractItemView::ScrollPerPixel</enum>
-      </property>
-      <column>
-       <property name="text">
-        <string>i</string>
+      <widget class="QWidget" name="page_1">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>901</width>
+         <height>469</height>
+        </rect>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Xi</string>
+       <property name="accessibleName">
+        <string/>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Vi</string>
+       <attribute name="label">
+        <string>таблица для V</string>
+       </attribute>
+       <widget class="QTableWidget" name="info_table">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>891</width>
+          <height>471</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>426</width>
+          <height>454</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>10000</width>
+          <height>9999999</height>
+         </size>
+        </property>
+        <property name="autoScroll">
+         <bool>true</bool>
+        </property>
+        <property name="autoScrollMargin">
+         <number>16</number>
+        </property>
+        <property name="verticalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <property name="horizontalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>i</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Xi</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Vi</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>V'i</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>V2i</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Vi-V2i</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ОЛП</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>h_i</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>C1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>C2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Ui</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>|Ui-Vi|</string>
+         </property>
+        </column>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>98</width>
+         <height>28</height>
+        </rect>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>V'i</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>V2i</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Vi-V2i</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ОЛП</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>h_i</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>C1</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>C2</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Ui</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>|Ui-Vi|</string>
-       </property>
-      </column>
+       <attribute name="label">
+        <string>таблица для V'</string>
+       </attribute>
+       <widget class="QTableWidget" name="info_table_V_dot">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>891</width>
+          <height>471</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
@@ -604,7 +497,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>914</width>
+     <width>913</width>
      <height>26</height>
     </rect>
    </property>

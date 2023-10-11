@@ -14,7 +14,7 @@ double f_test(double x, double u) {
     return -0.5 * u;
 }
 // Аналитическое решение тестовой задачи
-double anal_sol_test(double x,double x0,double u0){
+double anal_sol_test(double x, double x0,double u0){
     return u0 * exp(-0.5 * (x-x0));
 }
 // du/dx = f_main_1(x,u)
@@ -35,8 +35,8 @@ void rK_step(double (*f)(double, double),double& x,double& u,double step){
     double k1, k2, k3, k4;
 
     k1 = f(x, u);
-    k2 = f(x + 0.5 * step, u + 0.5 * k1);
-    k3 = f(x + 0.5 * step, u + 0.5 * k2);
+    k2 = f(x + 0.5 * step, u + 0.5 * step * k1);
+    k3 = f(x + 0.5 * step, u + 0.5 * step * k2);
     k4 = f(x + step, u + step * k3);
 
     u = u + (step / 6) * (k1 + 2 * k2 + 2 * k3 + k4);
@@ -104,7 +104,7 @@ bool inside(double x,double b,double eps_b){
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 // - - max|u_i-v_i| = "" при x = ""
-extern "C" __declspec(dllexport) void run_test_method(double x0,double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     //std::ofstream file_1(R"(C:\C++_proj\NM\NumMethodsLab1\NM1\test_method_1.txt)"); // Файл с данными для таблицы
@@ -135,7 +135,7 @@ extern "C" __declspec(dllexport) void run_test_method(double x0,double u0, int N
     double x_max_diff = 0; // Координата макс. модуля разности с числ. реш
     double diff; // Разность числ и анал реш в точке
     double sol; // Анал реш в точке
-    for (int i = 0; i < Nmax && inside(x+h,b,eps_b); ++i) {
+    for (int i = 0; (i < Nmax) && inside(x,b,eps_b); ++i) {
         if(h > max_step){
             max_step = h;
             x_max_step = x;
@@ -145,6 +145,12 @@ extern "C" __declspec(dllexport) void run_test_method(double x0,double u0, int N
             x_min_step = x;
         }
         // Находимся в точке (x_n,v_n)
+        // Проверим, что сделав шаг h мы не вылетим за границу
+        while((x+h)>b){
+            h = h/2.0; // Делим пополам
+            ++C1;
+        }
+
         // Текущие координаты численной траектории
         x_current = x;
         v_current = v;
@@ -159,7 +165,7 @@ extern "C" __declspec(dllexport) void run_test_method(double x0,double u0, int N
         rK_step(f_test,x_current,v_current,h);
 
         // Вычисляем
-        S = std::abs((v_help - v_current) / 15.0);
+        S = std::abs(v_help - v_current) / 15.0;
         OLP = 16 * S; // Оценка локальной погрешности
         if(OLP > max_OLP)
             max_OLP = OLP;
@@ -193,7 +199,7 @@ extern "C" __declspec(dllexport) void run_test_method(double x0,double u0, int N
     file_2.close();
 }
 // Тот же метод с постоянным шагом
-extern "C" __declspec(dllexport) void run_test_method_const_step(double x0,double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     //std::ofstream file_1(R"(C:\C++_proj\NM\NumMethodsLab1\NM1\test_method_1.txt)"); // Файл с данными для таблицы
@@ -224,7 +230,7 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0,doubl
     double x_max_diff = 0.0; // Координата макс. модуля разности
     double diff; // Разность числ и анал реш в точке
     double sol; // Анал реш в точке
-    for (int i = 0; i < Nmax && inside(x+h,b,eps_b); ++i) {
+    for (int i = 0; (i < Nmax) && inside(x+h,b,eps_b); ++i) {
         if(h > max_step){
             max_step = h;
             x_max_step = x;
@@ -234,39 +240,29 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0,doubl
             x_min_step = x;
         }
         // Находимся в точке (x_n,v_n)
+
         // Текущие координаты численной траектории
         x_current = x;
         v_current = v;
-        x_help = x_current;
-        v_help = v_current;
-        // Перейдём во вспомогательную точку половинным шагом
-        rK_step(f_test,x_help,v_help,h/2);
-        // Получим новую точку ЧТ тем же половинным шагом
-        rK_step(f_test,x_help,v_help,h/2);
 
-        // Теперь считаем эту же точку с шагом h
+        // Теперь считаем эту точку с шагом h
         rK_step(f_test,x_current,v_current,h);
 
-        // Вычисляем
-        S = std::abs((v_help - v_current) / 15.0);
-        OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
 
         // Всегда принимаем следующую точку
         x = x_current;
         v = v_current;
         sol = anal_sol_test(x,x0,u0); // Аналит. реш в этой точке
         diff =  std::abs(sol-v);
-        if(diff > max_diff)
+        if (diff > max_diff)
             max_diff = diff;
-        file_1 << (i + 1) << " " << x << " " << v << " " << v_help<< " " <<v-v_help<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2<< " "<<sol<< " "<< diff <<"\n";
+        file_1 << (i + 1) << " " << x << " " << v << " " << h << " " << C1 << " " << C2 << " " << sol << " " << diff << "\n";
 
 
         n = i + 1;
     }
     file_1.close();
-    file_2 << n << " " << b-x << " " << max_OLP << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step << " " << max_diff<<" "<<x_max_diff ;
+    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step << " " << max_diff << " " << x_max_diff;
     file_2.close();
 }
 
@@ -291,7 +287,7 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0,doubl
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 
-extern "C" __declspec(dllexport) void run_main_method_1(double x0,double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_main_method_1(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     std::ofstream file_1("main_method_1_1.txt"); // Файл с данными для таблицы
@@ -317,7 +313,7 @@ extern "C" __declspec(dllexport) void run_main_method_1(double x0,double u0, int
     double min_step = h; // Минимальный шаг
     double x_min_step=0; // Соотв коорд
 
-    for (int i = 0; i < Nmax && inside(x+h,b,eps_b); ++i) {
+    for (int i = 0; (i < Nmax) && inside(x,b,eps_b); ++i) {
         if(h > max_step){
             max_step = h;
             x_max_step = x;
@@ -327,6 +323,11 @@ extern "C" __declspec(dllexport) void run_main_method_1(double x0,double u0, int
             x_min_step = x;
         }
         // Находимся в точке (x_n,v_n)
+        // Проверим, что сделав шаг h мы не вылетим за границу
+        while((x+h)>b){
+            h = h/2.0; // Делим пополам
+            ++C1;
+        }
         // Текущие координаты численной траектории
         x_current = x;
         v_current = v;
@@ -369,7 +370,7 @@ extern "C" __declspec(dllexport) void run_main_method_1(double x0,double u0, int
     file_2.close();
 }
 // Версия с постоянным шагом
-extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0,double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     std::ofstream file_1("main_method_1_1_const_step.txt"); // Файл с данными для таблицы
@@ -395,7 +396,7 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0,dou
     double min_step = h; // Минимальный шаг
     double x_min_step=0; // Соотв коорд
 
-    for (int i = 0; i < Nmax && inside(x+h,b,eps_b); ++i) {
+    for (int i = 0; (i < Nmax) && inside(x+h,b,eps_b); ++i) {
         if(h > max_step){
             max_step = h;
             x_max_step = x;
@@ -408,30 +409,19 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0,dou
         // Текущие координаты численной траектории
         x_current = x;
         v_current = v;
-        x_help = x_current;
-        v_help = v_current;
-        // Перейдём во вспомогательную точку половинным шагом
-        rK_step(f_main_1,x_help,v_help,h/2);
-        // Получим новую точку ЧТ тем же половинным шагом
-        rK_step(f_main_1,x_help,v_help,h/2);
 
-        // Теперь считаем эту же точку с шагом h
+        // Теперь считаем эту точку с шагом h
         rK_step(f_test,x_current,v_current,h);
 
-        // Вычисляем
-        S = std::abs((v_help - v_current) / 15.0);
-        OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
         // Принимаем следующую точку
         x = x_current;
         v = v_current;
 
-        file_1 << (i + 1) << " " << x << " " << v << " " << v_help<< " " <<v-v_help<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
+        file_1 << (i + 1) << " " << x << " " << v << " " << h << " " << C1 << " " << C2 << "\n";
         n = i + 1;
     }
     file_1.close();
-    file_2 << n << " " << b-x << " " << max_OLP << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
+    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step;
     file_2.close();
 }
 // Евклидова норма
@@ -462,12 +452,12 @@ double euclid_norm(pair<double,double> v1, pair<double,double> v2){
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 
-extern "C" __declspec(dllexport) void run_main_method_2(double x0,double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
+extern "C" __declspec(dllexport) void run_main_method_2(double x0, double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
     // x0 = 0
 
-    std::ofstream file_1("main_method_2_1.txt"); // Файл с данными для таблицы
+    std::ofstream file_1("main_method_2_1_v.txt"); // Файл с данными для таблицы
     std::ofstream file_2("main_method_2_2.txt"); // Файл с выходными данными
-
+    std::ofstream file_3("main_method_2_1_v_dot.txt"); // Файл с данными для таблицы
 
     pair<double,double> v = {u0,u0_dot}; // Теперь мы итерируем вектор
     double x = x0;
@@ -489,7 +479,7 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0,double u0,doub
     double min_step = h; // Минимальный шаг
     double x_min_step=0; // Соотв коорд
 
-    for (int i = 0; i < Nmax && inside(x+h,b,eps_b); ++i) {
+    for (int i = 0; (i < Nmax) && inside(x,b,eps_b); ++i) {
         if(h > max_step){
             max_step = h;
             x_max_step = x;
@@ -499,6 +489,11 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0,double u0,doub
             x_min_step = x;
         }
         // Находимся в точке (x_n,v_n)
+        // Проверим, что сделав шаг h мы не вылетим за границу
+        while((x+h)>b){
+            h = h/2.0; // Делим пополам
+            ++C1;
+        }
         // Текущие координаты численной траектории
         x_current = x;
         v_current = v;
@@ -523,7 +518,8 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0,double u0,doub
             x = x_current;
             v = v_current;
             // Здесь не как в таблице сделано - добавлена производная u' = v.second
-            file_1 << (i + 1) << " " << x << " " << v.first<< " " <<v.second << " " << v_help.first<< " " <<v.first-v_help.first<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
+            file_1 << (i + 1) << " " << x << " " << v.first << " " << v_help.first<< " " <<v.first-v_help.first<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
+            file_3 << (i + 1) << " " << x << " " << v.second << " " << v_help.second<< " " <<v.second-v_help.second<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
             if(S < eps/32){
                 // Продолжаем счёт с удвоенным шагом
                 h = 2 * h; // Удвоили шаг
@@ -537,17 +533,18 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0,double u0,doub
         }
         n = i + 1;
     }
+    file_3.close();
     file_1.close();
     file_2 << n << " " << b-x << " " << max_OLP << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
     file_2.close();
 }
 
-extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0,double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
+extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0, double u0,double u0_dot, int Nmax,double b, double eps_b, double eps, double step,double a){
     // x0 = 0
 
-    std::ofstream file_1("main_method_2_1_const_step.txt"); // Файл с данными для таблицы
+    std::ofstream file_1("main_method_2_1_const_step_v.txt"); // Файл с данными для таблицы
     std::ofstream file_2("main_method_2_2_const_step.txt"); // Файл с выходными данными
-
+    std::ofstream file_3("main_method_2_1_const_step_v_dot.txt"); // Файл с данными для таблицы
 
     pair<double,double> v = {u0,u0_dot}; // Теперь мы итерируем вектор
     double x = x0;
@@ -583,31 +580,21 @@ extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0,dou
         x_current = x;
         v_current = v;
 
-        x_help = x_current;
-        v_help = v_current;
-        // Перейдём во вспомогательную точку половинным шагом
-        rK_step(f_main_2,x_help,v_help,h/2,a);
-        // Получим новую точку ЧТ тем же половинным шагом
-        rK_step(f_main_2,x_help,v_help,h/2,a);
 
-        // Теперь считаем эту же точку с шагом h
+        // Теперь считаем эту точку с шагом h
         rK_step(f_main_2,x_current,v_current,h,a);
 
-        // Вычисляем
-        S = euclid_norm(v_help,v_current)/ 15.0;
-        OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
 
         // Принимаем следующую точку
         x = x_current;
         v = v_current;
         // Здесь не как в таблице сделано - добавлена производная u' = v.second
-        file_1 << (i + 1) << " " << x << " " << v.first<< " " <<v.second << " " << v_help.first<< " " <<v.first-v_help.first<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
-
+        file_1 << (i + 1) << " " << x << " " << v.first << " " << h << " " << C1 << " " << C2 << "\n";
+        file_3 << (i + 1) << " " << x << " " << v.second << " " << h << " " << C1 << " " << C2 << "\n";
         n = i + 1;
     }
+    file_3.close();
     file_1.close();
-    file_2 << n << " " << b-x << " " << max_OLP << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
+    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step;
     file_2.close();
 }
