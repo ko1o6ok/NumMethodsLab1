@@ -219,7 +219,8 @@ class UI_mainWindow(QMainWindow):
             self.plt_PS.legend(loc="upper right")
         else:
             self.clear_table(self.info_table_V_dot)
-
+            self.plt_PS.cla()
+            
         self.plt.plot(X_arr, V_arr, label="Числ. решение")
         self.plt.scatter(X_start, u0,
                          label="Старт. точка")  # scatter - построение точечного графика. В данном случае просто ставит точку (x0,u0)
