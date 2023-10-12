@@ -11,6 +11,7 @@ import time
 from table_columns import columns, extra_info_rows
 
 ui_file = './UI/MainWindow.ui'
+lib_type = ["Release", "Debug"][0]
 
 
 def create_plot(parent):
@@ -105,7 +106,9 @@ class UI_mainWindow(QMainWindow):
             i += 1
 
     def plotting(self):
-        lib_dir = os.path.join(os.curdir, "dll", "libNM1_lib.dll")
+        lib_dir = os.path.join(os.curdir, "dll", lib_type, "libNM1_lib.dll")
+
+
         lib = ctypes.windll.LoadLibrary(lib_dir)
 
         X_start = 0.0
