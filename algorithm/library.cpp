@@ -340,7 +340,7 @@ extern "C" __declspec(dllexport) void run_main_method_1(double u0, int Nmax,doub
         rK_step(f_main_1,x_help,v_help,h/2);
 
         // Теперь считаем эту же точку с шагом h
-        rK_step(f_test,x_current,v_current,h);
+        rK_step(f_main_1,x_current,v_current,h);
 
         // Вычисляем
         S = std::abs((v_help - v_current) / 15.0);
@@ -413,7 +413,7 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double u0, in
         v_current = v;
 
         // Теперь считаем эту точку с шагом h
-        rK_step(f_test,x_current,v_current,h);
+        rK_step(f_main_1,x_current,v_current,h);
 
         // Принимаем следующую точку
         x = x_current;
