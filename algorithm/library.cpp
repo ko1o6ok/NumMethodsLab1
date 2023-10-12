@@ -167,10 +167,11 @@ extern "C" __declspec(dllexport) void run_test_method(double u0, int Nmax,double
         // Вычисляем
         S = std::abs(v_help - v_current) / 15.0;
         OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
+
         if(S <= eps){
             // Принимаем следующую точку
+            if(OLP > max_OLP)
+                max_OLP = OLP;
             x = x_current;
             v = v_current;
             sol = anal_sol_test(x,u0); // Аналит. реш в этой точке
@@ -344,9 +345,10 @@ extern "C" __declspec(dllexport) void run_main_method_1(double u0, int Nmax,doub
         // Вычисляем
         S = std::abs((v_help - v_current) / 15.0);
         OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
+
         if(S <= eps){
+            if(OLP > max_OLP)
+                max_OLP = OLP;
             // Принимаем следующую точку
             x = x_current;
             v = v_current;
@@ -511,9 +513,10 @@ extern "C" __declspec(dllexport) void run_main_method_2(double u0,double u0_dot,
         // Вычисляем
         S = euclid_norm(v_help,v_current)/ 15.0;
         OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
+
         if(S <= eps){
+            if(OLP > max_OLP)
+                max_OLP = OLP;
             // Принимаем следующую точку
             x = x_current;
             v = v_current;
