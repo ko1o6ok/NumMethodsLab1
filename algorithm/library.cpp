@@ -14,7 +14,7 @@ double f_test(double x, double u) {
     return -0.5 * u;
 }
 // Аналитическое решение тестовой задачи
-double anal_sol_test(double x, double x0,double u0){
+double anal_sol_test(double x,double x0,double u0){
     return u0 * exp(-0.5 * (x-x0));
 }
 // du/dx = f_main_1(x,u)
@@ -104,7 +104,7 @@ bool inside(double x,double b,double eps_b){
 // - - max h = "" при x = ""
 // - - min h= "" при x = ""
 // - - max|u_i-v_i| = "" при x = ""
-extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int Nmax,double b, double eps_b, double eps, double step){
+extern "C" __declspec(dllexport) void run_test_method(double x0,double u0, int Nmax,double b, double eps_b, double eps, double step){
     // x0 = 0
 
     //std::ofstream file_1(R"(C:\C++_proj\NM\NumMethodsLab1\NM1\test_method_1.txt)"); // Файл с данными для таблицы
@@ -167,10 +167,11 @@ extern "C" __declspec(dllexport) void run_test_method(double x0, double u0, int 
         // Вычисляем
         S = std::abs(v_help - v_current) / 15.0;
         OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
+
         if(S <= eps){
             // Принимаем следующую точку
+            if(OLP > max_OLP)
+                max_OLP = OLP;
             x = x_current;
             v = v_current;
             sol = anal_sol_test(x,x0,u0); // Аналит. реш в этой точке
@@ -254,15 +255,15 @@ extern "C" __declspec(dllexport) void run_test_method_const_step(double x0, doub
         v = v_current;
         sol = anal_sol_test(x,x0,u0); // Аналит. реш в этой точке
         diff =  std::abs(sol-v);
-        if (diff > max_diff)
+        if(diff > max_diff)
             max_diff = diff;
-        file_1 << (i + 1) << " " << x << " " << v << " " << h << " " << C1 << " " << C2 << " " << sol << " " << diff << "\n";
+        file_1 << (i + 1) << " " << x << " " << v << " " <<h << " " <<C1<< " " <<C2<< " "<<sol<< " "<< diff <<"\n";
 
 
         n = i + 1;
     }
     file_1.close();
-    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step << " " << max_diff << " " << x_max_diff;
+    file_2 << n << " " << b-x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step << " " << max_diff<<" "<<x_max_diff ;
     file_2.close();
 }
 
@@ -339,14 +340,15 @@ extern "C" __declspec(dllexport) void run_main_method_1(double x0, double u0, in
         rK_step(f_main_1,x_help,v_help,h/2);
 
         // Теперь считаем эту же точку с шагом h
-        rK_step(f_test,x_current,v_current,h);
+        rK_step(f_main_1,x_current,v_current,h);
 
         // Вычисляем
         S = std::abs((v_help - v_current) / 15.0);
         OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
+
         if(S <= eps){
+            if(OLP > max_OLP)
+                max_OLP = OLP;
             // Принимаем следующую точку
             x = x_current;
             v = v_current;
@@ -378,7 +380,7 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, do
 
 
     double v = u0;
-    double x = x0;
+    double x = 0.0;
     double h = step;
 
     double x_help,v_help; // Координаты вспомогательной точки численной траектории
@@ -411,17 +413,17 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double x0, do
         v_current = v;
 
         // Теперь считаем эту точку с шагом h
-        rK_step(f_test,x_current,v_current,h);
+        rK_step(f_main_1,x_current,v_current,h);
 
         // Принимаем следующую точку
         x = x_current;
         v = v_current;
 
-        file_1 << (i + 1) << " " << x << " " << v << " " << h << " " << C1 << " " << C2 << "\n";
+        file_1 << (i + 1) << " " << x << " " << v << " " <<h << " " <<C1<< " " <<C2 <<"\n";
         n = i + 1;
     }
     file_1.close();
-    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step;
+    file_2 << n << " " << b-x  << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
     file_2.close();
 }
 // Евклидова норма
@@ -511,9 +513,10 @@ extern "C" __declspec(dllexport) void run_main_method_2(double x0, double u0,dou
         // Вычисляем
         S = euclid_norm(v_help,v_current)/ 15.0;
         OLP = 16 * S; // Оценка локальной погрешности
-        if(OLP > max_OLP)
-            max_OLP = OLP;
+
         if(S <= eps){
+            if(OLP > max_OLP)
+                max_OLP = OLP;
             // Принимаем следующую точку
             x = x_current;
             v = v_current;
@@ -589,12 +592,12 @@ extern "C" __declspec(dllexport) void run_main_method_2_const_step(double x0, do
         x = x_current;
         v = v_current;
         // Здесь не как в таблице сделано - добавлена производная u' = v.second
-        file_1 << (i + 1) << " " << x << " " << v.first << " " << h << " " << C1 << " " << C2 << "\n";
-        file_3 << (i + 1) << " " << x << " " << v.second << " " << h << " " << C1 << " " << C2 << "\n";
+        file_1 << (i + 1) << " " << x << " " << v.first << " " <<h << " " <<C1<< " " <<C2 <<"\n";
+        file_3 << (i + 1) << " " << x << " " << v.second<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
         n = i + 1;
     }
     file_3.close();
     file_1.close();
-    file_2 << n << " " << b - x << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step;
+    file_2 << n << " " << b-x  << " " << C2 << " " << C1 << " " << max_step << " " << x_max_step << " " << min_step << " " << x_min_step ;
     file_2.close();
 }
