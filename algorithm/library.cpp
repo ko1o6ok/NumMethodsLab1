@@ -432,6 +432,11 @@ double euclid_norm(pair<double,double> v1, pair<double,double> v2){
     double d2 = v1.second-v2.second;
     return sqrt(d1*d1 + d2*d2);
 }
+
+std::pair<double,double> diff(std::pair<double,double> v1, std::pair<double,double> v2){
+    return {std::abs(v1.first-v2.first),std::abs(v1.second-v2.second)};
+}
+
 // Метод для основной задачи - 2
 // -------------------------
 // (u0,u0_dot) - начальные значения
@@ -468,14 +473,16 @@ extern "C" __declspec(dllexport) void run_main_method_2(double u0,double u0_dot,
     double x_help; // Координаты вспомогательной точки численной траектории
     pair<double,double> v_help,v_current;
     double x_current; // Текущее положение
-    double S = 10000; // Параметр оценки локальной погрешности
-
+    //double S = 10000; // Параметр оценки локальной погрешности
+    pair<double,double> S;
+    double S_norm; // Норма вектора S
     int C1 = 0; // Счётчик деления шага
     int C2 = 0; // Счётчик удвоений шага
 
     double n=0; // Будет считать число итераций
     double max_OLP = -1; // Макс модуль ОЛП
-    double OLP;
+    pair<double,double> OLP;
+    double OLP_norm; // Норма ОЛП
     double max_step = -1; // Максимальный шаг
     double x_max_step; // Соотв коорд
     double min_step = h; // Минимальный шаг
@@ -511,19 +518,21 @@ extern "C" __declspec(dllexport) void run_main_method_2(double u0,double u0_dot,
         rK_step(f_main_2,x_current,v_current,h,a);
 
         // Вычисляем
-        S = euclid_norm(v_help,v_current)/ 15.0;
-        OLP = 16 * S; // Оценка локальной погрешности
-
-        if(S <= eps){
-            if(OLP > max_OLP)
-                max_OLP = OLP;
+        auto df = diff(v_help,v_current);
+        S = {df.first/15.0,df.second/15};
+        S_norm = euclid_norm({0,0},S);
+        OLP = {16*S.first,16*S.second}; // Оценка локальной погрешности
+        OLP_norm = euclid_norm({0,0},OLP);
+        if(S_norm <= eps){
+            if(OLP_norm > max_OLP)
+                max_OLP = OLP_norm;
             // Принимаем следующую точку
             x = x_current;
             v = v_current;
             // Здесь не как в таблице сделано - добавлена производная u' = v.second
-            file_1 << (i + 1) << " " << x << " " << v.first << " " << v_help.first<< " " <<v.first-v_help.first<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
-            file_3 << (i + 1) << " " << x << " " << v.second << " " << v_help.second<< " " <<v.second-v_help.second<< " " <<16*S<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
-            if(S < eps/32){
+            file_1 << (i + 1) << " " << x << " " << v.first << " " << v_help.first<< " " <<v.first-v_help.first<< " " <<OLP.first<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
+            file_3 << (i + 1) << " " << x << " " << v.second << " " << v_help.second<< " " <<v.second-v_help.second<< " " <<OLP.second<< " " <<h << " " <<C1<< " " <<C2 <<"\n";
+            if(S_norm < eps/32){
                 // Продолжаем счёт с удвоенным шагом
                 h = 2 * h; // Удвоили шаг
                 C2 ++;

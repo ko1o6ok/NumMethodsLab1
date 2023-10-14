@@ -71,6 +71,8 @@ extern "C" __declspec(dllexport) void run_main_method_1_const_step(double u0, in
 // Евклидова норма
 double euclid_norm(std::pair<double,double> v1, std::pair<double,double> v2);
 
+// Разница векторов (модули координат)
+std::pair<double,double> diff(std::pair<double,double> v1, std::pair<double,double> v2);
 // Метод для основной задачи - 2
 // -------------------------
 // (u0,u0_dot) - начальные значения
